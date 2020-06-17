@@ -3,6 +3,8 @@ package elo
 import java.util.*
 import kotlin.math.pow
 
+typealias Team = Array<IRankedPlayer>
+
 interface IMatch {
 
     var finished: Boolean
@@ -15,14 +17,14 @@ interface IMatch {
 
     fun getWinOdds(playerOneRating: Double, enemyTeamRating: Double): Double
 
-    fun gameIsOver(result: MatchResult)
+    fun gameIsOver(result: MatchResult): Team?
 }
 
 class Match private constructor(
-    private val teamA: Array<IRankedPlayer> = arrayOf(),
-    private val teamB: Array<IRankedPlayer> = arrayOf()
+    private val teamA: Team = arrayOf(),
+    private val teamB: Team = arrayOf()
 ) : IMatch {
-    
+
     override var id: UUID = UUID.randomUUID()
 
     override var finished: Boolean = false
@@ -32,11 +34,11 @@ class Match private constructor(
     }
 
     data class Builder(
-        var teamA: Array<IRankedPlayer>? = null,
-        var teamB: Array<IRankedPlayer>? = null
+        var teamA: Team? = null,
+        var teamB: Team? = null
     ) {
-        fun teamA(teamA: Array<IRankedPlayer>) = apply { this.teamA = teamA }
-        fun teamB(teamB: Array<IRankedPlayer>) = apply { this.teamB = teamB }
+        fun teamA(teamA: Team) = apply { this.teamA = teamA }
+        fun teamB(teamB: Team) = apply { this.teamB = teamB }
         fun build(): IMatch? {
             if (teamA == null || teamB == null) {
                 return null
@@ -92,19 +94,20 @@ class Match private constructor(
         else teamA.sumByDouble { it.rating } / teamA.size
     }
 
-    //probability of victory of one player depending on the average team rating of the opponent
+    //probability of victory of one player depending on the average team rating of the opponent team
     override fun getWinOdds(playerOneRating: Double, enemyTeamRating: Double): Double {
         return 1.0 / (1 + 10.0.pow(((enemyTeamRating - playerOneRating) / 400)))
     }
 
     @Throws(GameIsAlreadyOverException::class)
-    override fun gameIsOver(result: MatchResult) {
-        if(finished)
+    override fun gameIsOver(result: MatchResult): Team? {
+        if (finished)
             throw GameIsAlreadyOverException()
 
         val newRatings = mutableListOf<Double>()
         val allPlayers = teamA.plus(teamB)
 
+        //Calculate all new ratings
         for (player in allPlayers) {
             val enemyOddRating = getOpponentsAverageRating(player)
             val odd = getWinOdds(player.rating, enemyOddRating)
@@ -114,14 +117,13 @@ class Match private constructor(
         allPlayers.forEachIndexed { index, iRankedUser -> iRankedUser.rating = newRatings[index] }
 
         finished = true
+        return if (result == MatchResult.TEAM_A_WINS) teamA else if (result == MatchResult.TEAM_B_WINS) teamB else null
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as Match
-
         if (id != other.id) return false
 
         return true
@@ -132,7 +134,7 @@ class Match private constructor(
     }
 
 
-    class GameIsAlreadyOverException: Exception("Game is already over")
+    class GameIsAlreadyOverException : Exception("Game is already over")
 
 }
 

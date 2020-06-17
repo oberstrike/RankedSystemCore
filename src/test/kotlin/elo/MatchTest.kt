@@ -1,7 +1,5 @@
-import elo.IMatch
-import elo.Match
-import elo.MatchResult
-import elo.RankedPlayer
+package elo
+
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
@@ -9,6 +7,7 @@ import org.junit.jupiter.api.Assertions
 
 class MatchTest : Spek({
     describe("A Match is starting") {
+
         val playerOne = RankedPlayer("PlayerOne")
         val playerTwo = RankedPlayer("PlayerTwo")
         val playerThree = RankedPlayer("PlayerThree", rating = 1200.0)
@@ -45,6 +44,9 @@ class MatchTest : Spek({
                 Assertions.assertTrue(playerOne.matches.contains(match))
             }
         }
+
+
+
 
     }
 
