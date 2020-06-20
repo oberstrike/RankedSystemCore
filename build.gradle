@@ -25,9 +25,12 @@ dependencies {
     implementation 'io.quarkus:quarkus-jackson'
     implementation 'io.quarkus:quarkus-kotlin'
     implementation 'io.quarkus:quarkus-config-yaml'
-    implementation 'io.quarkus:quarkus-mongodb-panache'
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-resteasy'
+    implementation 'io.quarkus:quarkus-resteasy-jsonb'
+    implementation 'io.quarkus:quarkus-hibernate-orm'
+    implementation 'io.quarkus:quarkus-jdbc-postgresql'
+
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 
     testImplementation 'io.quarkus:quarkus-junit5'
@@ -46,6 +49,7 @@ allOpen {
     annotation("javax.ws.rs.Path")
     annotation("javax.enterprise.context.ApplicationScoped")
     annotation("io.quarkus.test.junit.QuarkusTest")
+    annotation("javax.persistence.Entity")
 }
 
 java {

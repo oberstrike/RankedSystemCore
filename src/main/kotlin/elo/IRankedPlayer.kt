@@ -17,16 +17,3 @@ interface IRankedPlayer {
     fun addMatch(match: IMatch)
 }
 
-class RankedPlayer(
-    override var name: String,
-    override var rating: Double = 1000.0,
-    override val matches: MutableList<IMatch> = mutableListOf()
-) : IRankedPlayer {
-
-    override fun addMatch(match: IMatch) {
-        matches.add(match)
-    }
-
-    //K-Faktor: https://de.wikipedia.org/wiki/Elo-Zahl
-    override fun getK(): Int = if (matches.size > 15) 16 else 25
-}
