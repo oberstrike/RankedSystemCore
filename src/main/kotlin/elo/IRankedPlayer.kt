@@ -7,26 +7,11 @@ package elo
  * Besitzt ein Rating, welches das aktuelle Elo-Niveau darstellt
  * + eine Match-History um zu verhindern, dass Spiele 2 mal gespielt werden
  */
-interface IRankedPlayer {
+interface IRankedPlayer<T: IRankedPlayer<T, S>, S: IMatch<S, T>> {
     var name: String
     var rating: Double
-    val matches: List<IMatch>
-
+    var matches: MutableSet<S>
     fun getK(): Int
-
-    fun addMatch(match: IMatch)
+    fun addMatch(match: S)
 }
 
-class RankedPlayer(
-    override var name: String,
-    override var rating: Double = 1000.0,
-    override val matches: MutableList<IMatch> = mutableListOf()
-) : IRankedPlayer {
-
-    override fun addMatch(match: IMatch) {
-        matches.add(match)
-    }
-
-    //K-Faktor: https://de.wikipedia.org/wiki/Elo-Zahl
-    override fun getK(): Int = if (matches.size > 15) 16 else 25
-}
