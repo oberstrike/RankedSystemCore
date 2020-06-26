@@ -1,60 +1,68 @@
-package server.domain
+package server.domain.match
 
 import elo.IMatch
-import elo.IRankedPlayer
 import elo.MatchResult
 import elo.MatchResultType
-import org.hibernate.mapping.Join
+import io.quarkus.hibernate.orm.panache.PanacheEntity
+import server.domain.ranked.RankedPlayer
 import javax.persistence.*
 import kotlin.math.pow
 
 
 @Entity
-class Match : IMatch {
+class Match : IMatch<Match, RankedPlayer>, PanacheEntity() {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    var id: Long = 0
+    @Enumerated(EnumType.STRING)
+    override lateinit var result: MatchResultType
+
+    override var version: String = "1.0"
 
     @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinTable(
-        name = "MatchPlayerTeamA",
+        name = "matchplayer",
         joinColumns = [
-            JoinColumn("Match_id")
+            JoinColumn("match_id")
         ],
         inverseJoinColumns = [
-            JoinColumn("Player_id")
+            JoinColumn("rankedPlayer_id")
         ]
     )
-    var teamA: List<RankedPlayer> = listOf()
+    var teamA: MutableSet<RankedPlayer> = mutableSetOf()
 
 
-    @ManyToMany
-    var teamB: List<RankedPlayer> = listOf()
+    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+    @JoinTable(
+        name = "MatchPlayer",
+        joinColumns = [
+            JoinColumn("match_id")
+        ],
+        inverseJoinColumns = [
+            JoinColumn("rankedPlayer_id")
+        ]
+    )
+    var teamB: MutableSet<RankedPlayer> = mutableSetOf()
 
     override var finished: Boolean = false
 
-    init {
-        teamA.plus(teamB).forEach { it.addMatch(this) }
-    }
 
     data class Builder(
-        var teamA: List<RankedPlayer>? = null,
-        var teamB: List<RankedPlayer>? = null,
+        var teamA: List<RankedPlayer> = listOf(),
+        var teamB: List<RankedPlayer> = listOf(),
+        var version: String = "",
         var id: Long = 0
     ) {
         fun teamA(teamA: List<RankedPlayer>) = apply { this.teamA = teamA }
         fun teamB(teamB: List<RankedPlayer>) = apply { this.teamB = teamB }
-
+        fun version(version: String) = apply { this.version = version }
         fun id(id: Long) = apply { this.id = id }
 
-        fun build(): IMatch? {
+        fun build(): Match {
             val match = Match()
             match.id = id
-            if (teamA != null)
-                match.teamA = this.teamA!!
-            if (teamB != null)
-                match.teamB = this.teamB!!
+            match.teamA = this.teamA.toMutableSet()
+            match.teamB = this.teamB.toMutableSet()
+
+            teamA.plus(teamB).forEach { it.addMatch(match) }
 
             return match
 
@@ -64,7 +72,7 @@ class Match : IMatch {
 
 
     //If the player has won +1 in case of a draw +0.5 in case of a defeat -1
-    override fun getScore(player: IRankedPlayer, resultType: MatchResultType): Double {
+    override fun getScore(player: RankedPlayer, resultType: MatchResultType): Double {
         if (!teamA.contains(player) && !teamB.contains(player))
             throw Exception("Player is not in the game")
         if (teamA.contains(player) && resultType == MatchResultType.TEAM_A_WINS) {
@@ -78,7 +86,7 @@ class Match : IMatch {
     }
 
 
-    override fun getOpponentsAverageRating(player: IRankedPlayer): Double {
+    override fun getOpponentsAverageRating(player: RankedPlayer): Double {
         return if (teamA.contains(player)) teamB.sumByDouble { it.rating } / teamB.size
         else teamA.sumByDouble { it.rating } / teamA.size
     }
@@ -90,7 +98,7 @@ class Match : IMatch {
 
 
     @Throws(GameIsAlreadyOverException::class)
-    override fun gameIsOver(resultType: MatchResultType): MatchResult<IRankedPlayer> {
+    override fun gameIsOver(resultType: MatchResultType): MatchResult<RankedPlayer> {
         if (finished)
             throw GameIsAlreadyOverException()
 
@@ -111,8 +119,8 @@ class Match : IMatch {
             return MatchResult(result = resultType)
         }
         return MatchResult(
-            winningTeam = (if (resultType == MatchResultType.TEAM_A_WINS) teamA else teamB) as List<IRankedPlayer>,
-            losingTeam = (if (resultType == MatchResultType.TEAM_A_WINS) teamB else teamA) as List<IRankedPlayer>,
+            winningTeam = (if (resultType == MatchResultType.TEAM_A_WINS) teamA else teamB).toList(),
+            losingTeam = (if (resultType == MatchResultType.TEAM_A_WINS) teamB else teamA).toList(),
             result = resultType
         )
     }

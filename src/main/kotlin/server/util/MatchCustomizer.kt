@@ -1,14 +1,14 @@
 package server.util
 
 import io.quarkus.jsonb.JsonbConfigCustomizer
-import server.domain.Match
+import server.domain.match.Match
+import javax.inject.Singleton
 import javax.json.bind.JsonbConfig
-import javax.json.bind.annotation.JsonbTypeSerializer
 import javax.json.bind.serializer.JsonbSerializer
 import javax.json.bind.serializer.SerializationContext
 import javax.json.stream.JsonGenerator
-import kotlin.reflect.KClass
 
+@Singleton
 class MatchCustomizer : JsonbConfigCustomizer {
 
     override fun customize(jsonbConfig: JsonbConfig?) {

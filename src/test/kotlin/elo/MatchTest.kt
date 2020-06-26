@@ -4,8 +4,8 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.jupiter.api.Assertions
-import server.domain.Match
-import server.domain.RankedPlayer
+import server.domain.match.Match
+import server.domain.ranked.RankedPlayer
 
 class MatchTest : Spek({
     describe("A Match is starting") {
@@ -14,7 +14,7 @@ class MatchTest : Spek({
         val playerTwo = RankedPlayer.Builder().name("PlayerTwo").build()
         val playerThree = RankedPlayer.Builder().name("PlayerThree").rating(1200.0).build()
 
-        val match: IMatch? = Match.Builder()
+        val match: Match? = Match.Builder()
             .teamA(listOf(playerOne, playerThree))
             .teamB(listOf(playerTwo))
             .build()
@@ -42,9 +42,6 @@ class MatchTest : Spek({
                 Assertions.assertTrue(playerTwo.rating > playerOne.rating)
             }
 
-            it("Player has played this game") {
-                Assertions.assertTrue(playerOne.matches.contains(match))
-            }
         }
 
 

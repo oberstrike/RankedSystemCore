@@ -1,28 +1,25 @@
-package server.domain
+package server.domain.ranked
 
-import elo.IMatch
 import elo.IRankedPlayer
+import io.quarkus.hibernate.orm.panache.PanacheEntity
+import server.domain.match.Match
 import javax.persistence.*
 
 
 @Entity
-class RankedPlayer : IRankedPlayer {
+class RankedPlayer : IRankedPlayer<RankedPlayer, Match>, PanacheEntity() {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    var id: Long = 0
+    @ManyToMany(mappedBy = "teamA")
+    override var matches: MutableSet<Match> = mutableSetOf()
+
+    override fun addMatch(match: Match) {
+        matches.add(match)
+    }
 
     override var name: String = ""
 
     override var rating: Double = 1000.0
 
-
-    @ManyToMany
-    override var matches: MutableList<Match> = mutableListOf()
-
-    override fun addMatch(match: IMatch) {
-        matches.add(match as Match)
-    }
 
     //K-Faktor: https://de.wikipedia.org/wiki/Elo-Zahl
     override fun getK(): Int = if (matches.size > 15) 16 else 25

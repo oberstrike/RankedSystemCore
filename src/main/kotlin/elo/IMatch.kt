@@ -1,17 +1,21 @@
 package elo
 
 
-interface IMatch {
+interface IMatch<S : IMatch<S, T>, T : IRankedPlayer<T, S>> {
+
+    var result: MatchResultType
 
     var finished: Boolean
 
-    fun getOpponentsAverageRating(player: IRankedPlayer): Double
+    var version: String
 
-    fun getScore(player: IRankedPlayer, resultType: MatchResultType): Double
+    fun getOpponentsAverageRating(player: T): Double
+
+    fun getScore(player: T, resultType: MatchResultType): Double
 
     fun getWinOdds(playerOneRating: Double, enemyTeamRating: Double): Double
 
-    fun gameIsOver(resultType: MatchResultType): MatchResult<IRankedPlayer>
+    fun gameIsOver(resultType: MatchResultType): MatchResult<T>
 }
 
 enum class MatchResultType {
@@ -20,7 +24,7 @@ enum class MatchResultType {
     DRAW
 }
 
-data class MatchResult<T : IRankedPlayer>(
+data class MatchResult<T : IRankedPlayer<*, *>>(
     var winningTeam: List<T>? = null,
     var losingTeam: List<T>? = null,
     var result: MatchResultType

@@ -1,5 +1,5 @@
 package elo
-
+/*
 interface IRankedList {
     fun addRankedPlayer(player: IRankedPlayer)
 
@@ -18,3 +18,4 @@ class RankedList : IRankedList {
         return players.find { it.name == name }
     }
 }
+ */

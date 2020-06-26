@@ -9,17 +9,6 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import javax.ws.rs.core.Application
 
-@OpenAPIDefinition(
-    tags = [Tag(name = "matches", description = "The path over which the games are managed.")],
-    info = Info(title = "Open API Swagger Demo", version = "1.0")
-)
-class RankedApplication : QuarkusApplication {
-
-    override fun run(vararg args: String?): Int {
-        Quarkus.waitForExit()
-        return 0
-    }
-}
 
 @QuarkusMain
 class Main {
@@ -32,4 +21,16 @@ class Main {
         }
     }
 
+    @OpenAPIDefinition(
+        tags = [Tag(name = "matches", description = "The path over which the games are managed."),
+            Tag(name = "player", description = "The path for the players of the ranked system")],
+        info = Info(title = "Open API Swagger Demo", version = "1.0")
+    )
+    open class RankedApplication : QuarkusApplication {
+
+        override fun run(vararg args: String?): Int {
+            Quarkus.waitForExit()
+            return 0
+        }
+    }
 }
