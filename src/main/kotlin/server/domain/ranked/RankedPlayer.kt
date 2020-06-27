@@ -30,7 +30,7 @@ class RankedPlayer : IRankedPlayer<RankedPlayer, Match>, PanacheEntity() {
         var name: String? = null,
         var rating: Double = 1000.0
     ) {
-        fun id(id: Long) = apply { this.id = id }
+        fun id(id: Long?) = apply { this.id = id }
         fun name(name: String) = apply { this.name = name }
         fun rating(rating: Double) = apply { this.rating = rating }
 

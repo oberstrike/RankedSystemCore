@@ -21,11 +21,6 @@ class Main {
         }
     }
 
-    @OpenAPIDefinition(
-        tags = [Tag(name = "matches", description = "The path over which the games are managed."),
-            Tag(name = "player", description = "The path for the players of the ranked system")],
-        info = Info(title = "Open API Swagger Demo", version = "1.0")
-    )
     open class RankedApplication : QuarkusApplication {
 
         override fun run(vararg args: String?): Int {
