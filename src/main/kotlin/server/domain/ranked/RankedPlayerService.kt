@@ -1,6 +1,7 @@
 package server.domain.ranked
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository
+import io.quarkus.panache.common.Page
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.inject.Inject
@@ -18,7 +19,7 @@ class RankedPlayerRepository : PanacheRepository<RankedPlayer> {
 
 interface RankedPlayerService {
 
-    fun getAll(): Array<RankedPlayerDTO>
+    fun getAll(page: Long): Array<RankedPlayerDTO>
 
     fun getPlayerByDTO(playerDTO: RankedPlayerDTO): RankedPlayerDTO?
 
@@ -42,11 +43,12 @@ class RankedPlayerServiceImpl : RankedPlayerService {
     @field: Default
     lateinit var rankedPlayerRepository: RankedPlayerRepository
 
-    override fun getAll() = rankedPlayerRepository
-        .findAll().list<RankedPlayer>()
-        .map {
-            convertToDTO(it)!!
-        }.toTypedArray()
+    override fun getAll(page: Long): Array<RankedPlayerDTO> {
+        val query = rankedPlayerRepository
+            .findAll()
+        query.page<RankedPlayer>(Page.ofSize(10))
+        return query.list<RankedPlayer>().map { convertToDTO(it)!! }.toTypedArray()
+    }
 
 
     override fun getPlayerByDTO(playerDTO: RankedPlayerDTO) =

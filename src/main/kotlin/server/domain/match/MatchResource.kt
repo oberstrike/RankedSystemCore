@@ -2,10 +2,8 @@ package server.domain.match
 
 import elo.MatchResultType
 import org.eclipse.microprofile.openapi.annotations.Operation
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Content
 import org.eclipse.microprofile.openapi.annotations.media.Schema
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
@@ -62,8 +60,8 @@ class MatchResource {
         summary = "Get all matches",
         operationId = "getAllMatches"
     )
-    fun getAll(): Array<MatchDTO> {
-        return matchService.findAll().toTypedArray()
+    fun getAll(@QueryParam("page") page: Int?): Array<MatchDTO> {
+        return matchService.findAll(page ?: 0)
     }
 
     @GET
@@ -72,8 +70,32 @@ class MatchResource {
         summary = "Get the game depending on the ID",
         operationId = "getMatchById"
     )
+    @APIResponses(
+        value = [
+            APIResponse(
+                description = "",
+                responseCode = "200",
+                content = arrayOf(
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON,
+                        schema = Schema(implementation = MatchDTO::class)
+                    )
+                )
+            ),
+            APIResponse(
+                description = "Not Found",
+                responseCode = "404",
+                content = arrayOf(
+                    Content(
+                        mediaType = MediaType.TEXT_PLAIN,
+                        example = "Not Found"
+                    )
+                )
+            )
+        ]
+    )
     fun getById(@PathParam("id") id: Long): MatchDTO? {
-        return matchService.getById(id)?.let { matchService.convertToDTO(it) }
+        return matchService.getById(id) ?: throw NotFoundException()
     }
 
     @GET
@@ -81,13 +103,47 @@ class MatchResource {
         summary = "Ends the game and evaluates the result.",
         operationId = "finishMatchById"
     )
+    @APIResponses(
+        value = [
+            APIResponse(
+                responseCode = "201",
+                description = "The game was successfully finished",
+                content = arrayOf(
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON,
+                        schema = Schema(implementation = MatchDTO::class)
+                    )
+                )
+            ),
+            APIResponse(
+                responseCode = "404",
+                description = "No Game with this ID was found",
+                content = arrayOf(
+                    Content(
+                        mediaType = MediaType.TEXT_PLAIN,
+                        example = "HTTP 404 Not Found"
+                    )
+                )
+            ),
+            APIResponse(
+                responseCode = "400",
+                description = "Game is already over",
+                content = arrayOf(
+                    Content(
+                        mediaType = MediaType.TEXT_PLAIN,
+                        example = "HTTP 400 Bad Request"
+                    )
+                )
+            )
+        ]
+    )
     @Path("/{id}/finish/{result}")
     fun finishById(
         @PathParam("id") id: Long,
         @PathParam("result") result: MatchResultType
     ): MatchDTO {
-        val match = matchService.getById(id) ?: throw NotFoundException()
-        return matchService.finishGame(result, match) ?: throw BadRequestException()
+        val matchDTO = matchService.getById(id) ?: throw NotFoundException()
+        return matchService.finishGame(result, matchDTO) ?: throw BadRequestException()
     }
 
 
@@ -97,9 +153,10 @@ class MatchResource {
         operationId = "getMatchByVersion"
     )
     @Path("/version/{version}")
-    fun getByVersion(@PathParam(value = "version") version: String): MatchDTO? {
-        return matchService.getByVersion(version)
+    fun getByVersion(
+        @PathParam(value = "version") version: String,
+        @QueryParam(value = "page") page: Long?
+    ): Array<MatchDTO> {
+        return matchService.getByVersion(version, page ?: 1)
     }
-
-
 }

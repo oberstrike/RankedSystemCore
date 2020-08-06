@@ -2,6 +2,8 @@ package server.domain.match
 
 import elo.MatchResultType
 import io.quarkus.hibernate.orm.panache.PanacheRepository
+import io.quarkus.panache.common.Page
+import server.domain.ranked.RankedPlayerRepository
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.inject.Inject
@@ -10,22 +12,25 @@ import javax.transaction.Transactional
 @ApplicationScoped
 class MatchRepository : PanacheRepository<Match> {
 
+    fun findByIdKotlin(id: Long): Match? {
+        return find("id", id).firstResultOptional<Match>().orElse(null)
+    }
+
 }
 
 interface IMatchService {
     fun createFromDTO(matchDTO: MatchDTO): Match?
 
-    fun createNew(): Match
+    fun getById(id: Long): MatchDTO?
 
-    fun getById(id: Long): Match?
-
-    fun getByVersion(version: String): MatchDTO?
+    fun getByVersion(version: String, page: Long = 1): Array<MatchDTO>
 
     fun convertToDTO(match: Match): MatchDTO
 
-    fun findAll(): List<MatchDTO>
+    fun findAll(page: Int = 0): Array<MatchDTO>
 
-    fun finishGame(result: MatchResultType, match: Match): MatchDTO?
+    fun finishGame(result: MatchResultType, match: MatchDTO): MatchDTO?
+
 }
 
 @ApplicationScoped
@@ -36,48 +41,61 @@ class MatchServiceImpl : IMatchService {
     @field: Default
     lateinit var matchRepository: MatchRepository
 
-    @Transactional
-    override fun createNew(): Match {
-        val match = Match.Builder().id(0).build()
-        match.persistAndFlush()
-        return match
-    }
+    @Inject
+    @field:Default
+    lateinit var playerRepository: RankedPlayerRepository
+
 
     @Transactional
-    override fun findAll(): List<MatchDTO> {
-        return matchRepository.findAll().list<Match>().map { convertToDTO(it) }
+    override fun findAll(page: Int): Array<MatchDTO> {
+        val query = matchRepository.findAll()
+        return query.page<Match>(Page.of(page, 10)).list<Match>().map { convertToDTO(it) }.toTypedArray()
     }
+
 
     @Transactional
     override fun finishGame(
         result: MatchResultType,
-        match: Match
+        match: MatchDTO
     ): MatchDTO? {
+        val match = matchRepository.findByIdOptional(match.id).orElse(null)
+
         if (!match.isPersistent)
             return null
+        if (match.finished)
+            throw Match.GameIsAlreadyOverException()
+
         match.gameIsOver(result)
         return convertToDTO(match)
     }
 
     @Transactional
     override fun createFromDTO(matchDTO: MatchDTO): Match? {
-        var match = getById(matchDTO.id)
+        var match = matchRepository.findById(matchDTO.id)
         if (match != null)
             return null
         match = Match()
-        match.version = matchDTO.version
+        match.version = matchDTO.version ?: "1.0"
+        val teamA = matchDTO.teamA.map { playerRepository.findById(it) }.toMutableSet()
+        val teamB = matchDTO.teamB.map { playerRepository.findById(it) }.toMutableSet()
+        match.teamA = teamA
+        match.teamB = teamB
 
         matchRepository.persist(match)
         return match
     }
 
     @Transactional
-    override fun getById(id: Long): Match? {
-        return matchRepository.findByIdOptional(id).orElse(null)
+    override fun getById(id: Long): MatchDTO? {
+        val match = matchRepository.findByIdKotlin(id) ?: return null
+        return convertToDTO(match)
     }
 
-    override fun getByVersion(version: String): MatchDTO? {
-        return convertToDTO(matchRepository.find("version", version).firstResultOptional<Match>().orElse(null))
+    override fun getByVersion(version: String, page: Long): Array<MatchDTO> {
+        val query = matchRepository.find("version", version)
+        query.page<Match>(Page.ofSize(10))
+
+        return query.list<Match>().map { convertToDTO(it) }.toTypedArray()
     }
 
 

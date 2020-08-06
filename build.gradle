@@ -16,6 +16,7 @@ allprojects {
 }
 
 dependencies {
+    implementation 'io.quarkus:quarkus-container-image-jib'
     implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.spek:spek-api:1.1.5"
@@ -32,11 +33,13 @@ dependencies {
 
     implementation 'io.quarkus:quarkus-hibernate-orm-panache'
     implementation 'io.quarkus:quarkus-jdbc-postgresql'
-
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'io.quarkus:quarkus-jdbc-h2'
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:kotlin-extensions'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
+    testImplementation 'io.quarkus:quarkus-test-h2'
 
     subprojects.forEach {
         archives(it)
@@ -71,6 +74,7 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_11
 }
+
 test {
     systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
 }

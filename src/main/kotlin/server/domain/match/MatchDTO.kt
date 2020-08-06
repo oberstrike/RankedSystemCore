@@ -1,13 +1,11 @@
 package server.domain.match
 
-import server.domain.ranked.RankedPlayerDTO
-
 data class MatchDTO(
     var id: Long = 0,
     var finished: Boolean = false,
     var teamA: Array<Long> = arrayOf(),
     var teamB: Array<Long> = arrayOf(),
-    var version: String = "1.0"
+    var version: String? = "1.0"
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

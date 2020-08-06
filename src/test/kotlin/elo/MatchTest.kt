@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions
 import server.domain.match.Match
 import server.domain.ranked.RankedPlayer
 
+//Unit test Match
 class MatchTest : Spek({
     describe("A Match is starting") {
 
@@ -41,6 +42,16 @@ class MatchTest : Spek({
             it("Player one wins") {
                 Assertions.assertTrue(playerTwo.rating > playerOne.rating)
             }
+        }
+
+        describe("Throws Exception if game is already over") {
+            it("Throws Exception") {
+                Assertions.assertThrows(Match.GameIsAlreadyOverException::class.java) {
+                    match?.gameIsOver(result)
+                }
+
+            }
+
 
         }
 

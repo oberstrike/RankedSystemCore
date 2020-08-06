@@ -20,10 +20,8 @@ class RankedPlayer : IRankedPlayer<RankedPlayer, Match>, PanacheEntity() {
 
     override var rating: Double = 1000.0
 
-
     //K-Faktor: https://de.wikipedia.org/wiki/Elo-Zahl
     override fun getK(): Int = if (matches.size > 15) 16 else 25
-
 
     data class Builder(
         var id: Long? = null,

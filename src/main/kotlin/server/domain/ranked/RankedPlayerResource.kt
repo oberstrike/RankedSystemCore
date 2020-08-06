@@ -49,8 +49,8 @@ class RankedPlayerResource {
         operationId = "getAllPlayers"
     )
     @Path("/all")
-    fun getAllPlayers(): Array<RankedPlayerDTO> {
-        return rankedPlayerService.getAll()
+    fun getAllPlayers(@QueryParam("page") page: Long?): Array<RankedPlayerDTO> {
+        return rankedPlayerService.getAll(page ?: 1)
     }
 
     @Operation(

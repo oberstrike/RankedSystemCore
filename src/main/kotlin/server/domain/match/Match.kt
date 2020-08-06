@@ -101,6 +101,8 @@ class Match : IMatch<Match, RankedPlayer>, PanacheEntity() {
     override fun gameIsOver(resultType: MatchResultType): MatchResult<RankedPlayer> {
         if (finished)
             throw GameIsAlreadyOverException()
+        result = resultType
+        finished = true
 
         val newRatings = mutableListOf<Double>()
         val allPlayers = teamA.plus(teamB)
@@ -113,7 +115,8 @@ class Match : IMatch<Match, RankedPlayer>, PanacheEntity() {
         }
 
         allPlayers.forEachIndexed { index, iRankedUser -> iRankedUser.rating = newRatings[index] }
-        finished = true
+
+
 
         if (resultType == MatchResultType.DRAW) {
             return MatchResult(result = resultType)
