@@ -9,12 +9,16 @@ import javax.persistence.*
 @Entity
 class RankedPlayer : IRankedPlayer<RankedPlayer, Match>, PanacheEntity() {
 
-    @ManyToMany(mappedBy = "teamA")
-    override var matches: MutableSet<Match> = mutableSetOf()
+    override val matches: Set<Match>
+        get() {
+            return teamAMatches.plus(teamBMatches)
+        }
 
-    override fun addMatch(match: Match) {
-        matches.add(match)
-    }
+    @ManyToMany(mappedBy = "teamA")
+    var teamAMatches: MutableSet<Match> = mutableSetOf()
+
+    @ManyToMany(mappedBy = "teamB")
+    var teamBMatches: MutableSet<Match> = mutableSetOf()
 
     override var name: String = ""
 

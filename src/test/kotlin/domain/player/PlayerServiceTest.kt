@@ -42,7 +42,7 @@ class PlayerServiceTest : AbstractDomainTest() {
     fun convertToDTOTest() = withPlayer { player ->
         withMatch { match ->
             match.teamA.add(player)
-            player.matches.add(match)
+            player.teamAMatches.add(match)
 
             val dto = playerService.convertToDTO(player)
             assert(dto != null)

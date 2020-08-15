@@ -12,7 +12,7 @@ import javax.transaction.Transactional
 @ApplicationScoped
 class MatchRepository : PanacheRepository<Match> {
 
-    fun findByIdKotlin(id: Long): Match? {
+    fun findByIdOrNull(id: Long): Match? {
         return find("id", id).firstResultOptional<Match>().orElse(null)
     }
 
@@ -29,7 +29,7 @@ interface IMatchService {
 
     fun findAll(page: Int = 0): Array<MatchDTO>
 
-    fun finishGame(result: MatchResultType, match: MatchDTO): MatchDTO?
+    fun finishGame(result: MatchResultType, matchDTO: MatchDTO): MatchDTO?
 
 }
 
@@ -56,9 +56,9 @@ class MatchServiceImpl : IMatchService {
     @Transactional
     override fun finishGame(
         result: MatchResultType,
-        match: MatchDTO
+        matchDTO: MatchDTO
     ): MatchDTO? {
-        val match = matchRepository.findByIdOptional(match.id).orElse(null)
+        val match = matchRepository.findByIdOptional(matchDTO.id).orElse(null)
 
         if (!match.isPersistent)
             return null
@@ -87,7 +87,7 @@ class MatchServiceImpl : IMatchService {
 
     @Transactional
     override fun getById(id: Long): MatchDTO? {
-        val match = matchRepository.findByIdKotlin(id) ?: return null
+        val match = matchRepository.findByIdOrNull(id) ?: return null
         return convertToDTO(match)
     }
 

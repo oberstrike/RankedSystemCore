@@ -7,6 +7,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.eclipse.microprofile.openapi.annotations.tags.Tags
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient
 import javax.enterprise.inject.Default
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -105,4 +106,6 @@ class RankedPlayerResource {
         val player = rankedPlayerService.getPlayerByName(name) ?: throw NotFoundException()
         return rankedPlayerService.getMatchesByPlayer(player)
     }
+
 }
+

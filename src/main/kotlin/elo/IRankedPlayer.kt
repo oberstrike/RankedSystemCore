@@ -10,8 +10,7 @@ package elo
 interface IRankedPlayer<T: IRankedPlayer<T, S>, S: IMatch<S, T>> {
     var name: String
     var rating: Double
-    var matches: MutableSet<S>
+    val matches: Set<S>
     fun getK(): Int
-    fun addMatch(match: S)
 }
 

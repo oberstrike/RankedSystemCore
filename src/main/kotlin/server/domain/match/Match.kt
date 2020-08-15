@@ -19,7 +19,7 @@ class Match : IMatch<Match, RankedPlayer>, PanacheEntity() {
 
     @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinTable(
-        name = "matchplayer",
+        name = "MatchPlayerTeamA",
         joinColumns = [
             JoinColumn("match_id")
         ],
@@ -61,8 +61,8 @@ class Match : IMatch<Match, RankedPlayer>, PanacheEntity() {
             match.id = id
             match.teamA = this.teamA.toMutableSet()
             match.teamB = this.teamB.toMutableSet()
-
-            teamA.plus(teamB).forEach { it.addMatch(match) }
+            teamA.forEach { it.teamAMatches.add(match) }
+            teamB.forEach { it.teamBMatches.add(match) }
 
             return match
 
