@@ -1,6 +1,9 @@
 package domain
 
 import io.smallrye.mutiny.Uni
+import org.eclipse.microprofile.rest.client.inject.RestClient
+import server.domain.auth.KeyCloakService
+import server.domain.auth.UserAuthClient
 import server.domain.match.Match
 import server.domain.match.MatchDTO
 import server.domain.match.MatchServiceImpl
@@ -12,10 +15,17 @@ import javax.transaction.Transactional
 abstract class AbstractDomainTest {
 
     @Inject
+    lateinit var keyCloakService: KeyCloakService
+
+    @Inject
     protected lateinit var matchService: MatchServiceImpl
 
     @Inject
     protected lateinit var playerService: RankedPlayerServiceImpl
+
+    @RestClient
+    @Inject
+    protected lateinit var authClient: UserAuthClient
 
     @Transactional
     fun withMatch(block: (Match) -> Unit) {

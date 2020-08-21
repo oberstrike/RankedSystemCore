@@ -44,6 +44,15 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV HTTP_PORT="8081"
+ENV DB_USERNAME="postgres"
+ENV DB_PASSWORD="mewtu123"
+ENV DB_HOST="postgres"
+ENV DB_PORT="5432"
+ENV DB_NAME="ranked"
+ENV AUTH_SERVER_HOST="keycloak"
+ENV AUTH_SERVER_PORT="8080"
+
 
 COPY build/lib/* /deployments/lib/
 COPY build/*-runner.jar /deployments/app.jar

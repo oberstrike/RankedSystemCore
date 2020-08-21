@@ -1,5 +1,6 @@
 package server.util
 
+import java.nio.file.attribute.UserPrincipalNotFoundException
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.NotFoundException
 import javax.ws.rs.core.Response
@@ -19,6 +20,15 @@ class BadRequestExceptionHandler : ExceptionMapper<BadRequestException> {
 
     override fun toResponse(exception: BadRequestException): Response {
         return Response.status(Response.Status.BAD_REQUEST).entity(exception.message).build()
+    }
+
+}
+
+@Provider
+class UserPrincipalNotFoundExceptionHandler: ExceptionMapper<UserPrincipalNotFoundException>{
+
+    override fun toResponse(exception: UserPrincipalNotFoundException): Response {
+        return Response.status(Response.Status.NOT_FOUND).entity(exception.message).build()
     }
 
 }

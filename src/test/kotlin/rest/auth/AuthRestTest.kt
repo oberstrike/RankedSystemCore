@@ -3,32 +3,85 @@ package rest.auth
 import io.quarkus.test.junit.QuarkusTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.testcontainers.junit.jupiter.Testcontainers
 import rest.AbstractRestTest
-import server.domain.auth.JWTToken
-import server.domain.auth.LoginForm
-import server.domain.auth.RegisterForm
-import server.domain.auth.getLogInForm
-
-fun AbstractRestTest.withLoggedIn(block: (jwtToken: JWTToken) -> Unit) {
-    val result = userAuthClient.login(
-        getLogInForm("alice", "alice")
-    )
-
-    block.invoke(
-        JWTToken(
-            result["access_token"] as String,
-            result["refresh_token"] as String
-        )
-    )
-}
+import server.domain.auth.*
+import util.createRegisterForm
+import javax.ws.rs.core.Form
 
 
 @QuarkusTest
+@Testcontainers
 class AuthRestTest : AbstractRestTest() {
 
     private fun sendLogout(accessToken: String, refreshToken: String): String {
         val response = sendPost("/auth/logout", bearerToken = accessToken, body = refreshToken)
         return response.body.asString()
+    }
+
+    @Test
+    fun resetPasswordFailWrongEmailTest() = withRegistered { user, jwtToken ->
+        val resetPasswordPath = "/auth/resetPassword"
+
+        //Wrong email
+        val passwordResetForm = PasswordResetForm(
+            "alice@gmx.de",
+            "mewtu123",
+            "mewtu123"
+        )
+
+        val response = sendPost(resetPasswordPath, toJson(passwordResetForm), bearerToken = jwtToken.accessToken)
+        Assertions.assertNotEquals(200, response.statusCode)
+
+    }
+
+    @Test
+    fun resetPasswordFailWrongPasswordsTest() = withRegistered { user, jwtToken ->
+        val resetPasswordPath = "/auth/resetPassword"
+
+        //Wrong email
+        val passwordResetForm = PasswordResetForm(
+            null,
+            "mewtu1234",
+            "mewtu123"
+        )
+
+        val response = sendPost(resetPasswordPath, toJson(passwordResetForm), bearerToken = jwtToken.accessToken)
+        Assertions.assertNotEquals(200, response.statusCode)
+    }
+
+
+    @Test
+    fun resetPasswordTest() = withRegistered { user, jwtToken ->
+        val resetPasswordPath = "/auth/resetPassword"
+
+        val passwordResetForm = PasswordResetForm(
+            null,
+            "mewtu123",
+            "mewtu123"
+        )
+
+        //Test if new Password doesnt fit
+        sendPost(
+            path = "/auth/login", body = LoginForm(
+                username = user.username,
+                password = passwordResetForm.password
+            )
+        ).then().statusCode(401)
+
+
+
+        sendPost(resetPasswordPath, toJson(passwordResetForm), bearerToken = jwtToken.accessToken)
+
+        //Test if new Password fits
+        sendPost(
+            path = "/auth/login", body = LoginForm(
+                username = user.username,
+                password = passwordResetForm.password
+            )
+        ).then().statusCode(200)
+
+
     }
 
     @Test
@@ -80,13 +133,47 @@ class AuthRestTest : AbstractRestTest() {
 
     @Test
     fun registerTest() {
-        val registerForm = RegisterForm(
-            "oberstrike2",
-            "mewtu123",
-            "oberstrike@gmx.de"
-        )
-        val response = sendPost(path = "/auth/register", body =  toJson(registerForm))
-        response.then().statusCode(200)
+
+        val registerForm = createRegisterForm()
+        val response = sendPost(path = "/auth/register", body = toJson(registerForm))
+        response.then().statusCode(204)
+
+        keyCloakService.delete(registerForm.username)
 
     }
+
+
+}
+
+fun AbstractRestTest.withLoggedIn(
+    loginForm: Form = getLogInForm("alice", "alice"),
+    block: (jwtToken: JWTToken) -> Unit
+) {
+    val result = userAuthClient.login(
+        loginForm
+    )
+
+    block.invoke(
+        JWTToken(
+            result["access_token"] as String,
+            result["refresh_token"] as String
+        )
+    )
+}
+
+fun AbstractRestTest.withRegistered(block: (user: UserDTO, jwtToken: JWTToken) -> Unit) {
+    val user = createRegisterForm()
+    keyCloakService.register(user.username, user.password, user.email)
+
+    withLoggedIn(getLogInForm(username = user.username, password = user.password)) {
+        block.invoke(
+            UserDTO(
+                username = user.username,
+                email = user.email
+            ), it
+        )
+    }
+
+    keyCloakService.delete(username = user.username)
+
 }

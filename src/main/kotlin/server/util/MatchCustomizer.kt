@@ -1,12 +1,17 @@
 package server.util
 
 import io.quarkus.jsonb.JsonbConfigCustomizer
+import server.domain.auth.LoginForm
 import server.domain.match.Match
+import java.lang.reflect.Type
 import javax.inject.Singleton
 import javax.json.bind.JsonbConfig
+import javax.json.bind.serializer.DeserializationContext
+import javax.json.bind.serializer.JsonbDeserializer
 import javax.json.bind.serializer.JsonbSerializer
 import javax.json.bind.serializer.SerializationContext
 import javax.json.stream.JsonGenerator
+import javax.json.stream.JsonParser
 
 @Singleton
 class MatchCustomizer : JsonbConfigCustomizer {
@@ -37,5 +42,5 @@ class MatchSerializer : JsonbSerializer<Match> {
         generator.write("teamB", context.serialize(teamB, generator).toString())
         generator.flush()
     }
-
 }
+
