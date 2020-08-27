@@ -30,4 +30,9 @@ interface UserAuthClient {
     @Consumes(MediaType.APPLICATION_JSON)
     fun changePassword()
 
+    @Path("/userinfo")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    fun userInfo(@HeaderParam("Authorization") authHeaderValue: String): Map<String, Any>?
+
 }

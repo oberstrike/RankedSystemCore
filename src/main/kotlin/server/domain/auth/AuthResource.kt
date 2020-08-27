@@ -42,6 +42,11 @@ class AuthResource {
     lateinit var keyCloakService: KeyCloakServiceImpl
 
 
+    @GET
+    fun getKeycloak(): String {
+        return keyCloakService.loginUrl()
+    }
+
     @Path("/profile")
     @GET
     @Authenticated
@@ -75,10 +80,12 @@ class AuthResource {
     @Path("/register")
     @POST
     fun register(registerForm: RegisterForm) {
-       // if (!registerForm.isValid())
-       //     throw RegistrationException("Error in registration")
+        if (!registerForm.isValid())
+            throw RegistrationException("Error in registration")
 
-        keyCloakService.register(registerForm.username, registerForm.password, registerForm.email)
+        val userDTO = keyCloakService.register(registerForm.username, registerForm.password, registerForm.email)
+
+
     }
 
     @Path("/username/{username}")
@@ -118,13 +125,14 @@ class AuthResource {
 }
 
 class RegistrationException(msg: String) : Exception(msg)
-class NoPermissionException(msg: String) : Exception(msg)
+class NoPermissionException(msg: String) : BadRequestException(msg)
 class EmailNotFoundException(msg: String = "") : Exception(msg)
 class PasswordEmptyException(msg: String = "") : Exception(msg)
 class PasswordsNotEqualException(msg: String = "") : Exception(msg)
 class UserIdNotFoundException(msg: String = "") : Exception(msg)
 
 data class JWTToken(
+    // val rawToken: String = "",
     val accessToken: String = "",
     val refreshToken: String = "",
     val refreshExpiresIn: BigDecimal = BigDecimal.ZERO,
@@ -137,6 +145,8 @@ data class JWTToken(
 fun RegisterForm.isValid(): Boolean {
     if (password != passwordConfirm)
         return false
+
+    /*
     if (username.length < 8)
         return false
     var regex = Regex("[a-c]")
@@ -148,6 +158,6 @@ fun RegisterForm.isValid(): Boolean {
     regex = Regex("\\d")
     if (!regex.containsMatchIn(password))
         return false
-
+*/
     return true
 }

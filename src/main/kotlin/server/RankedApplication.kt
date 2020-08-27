@@ -59,6 +59,9 @@ class Main {
 open class RankedApplication : QuarkusApplication, Application() {
 
     override fun run(vararg args: String?): Int {
+
+
+
         Quarkus.waitForExit()
         return 0
     }

@@ -1,13 +1,18 @@
 package server.domain.ranked
 
+import io.quarkus.oidc.runtime.OidcJwtCallerPrincipal
+import io.quarkus.runtime.annotations.RegisterForReflection
+import io.quarkus.security.Authenticated
+import io.quarkus.security.identity.SecurityIdentity
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.eclipse.microprofile.openapi.annotations.media.Content
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirements
 import org.eclipse.microprofile.openapi.annotations.tags.Tag
 import org.eclipse.microprofile.openapi.annotations.tags.Tags
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient
 import javax.enterprise.inject.Default
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -25,6 +30,9 @@ class RankedPlayerResource {
     @field: Default
     lateinit var rankedPlayerService: RankedPlayerService
 
+    @Inject
+    lateinit var securityIdentity: SecurityIdentity
+
     @POST
     @Operation(
         summary = "Method for creating a new player with a starting rating of 1000",
@@ -36,12 +44,35 @@ class RankedPlayerResource {
             APIResponse(responseCode = "400", description = "The request was incorrect or the name is already used")
         ]
     )
-    fun addPlayer(playerDTO: RankedPlayerDTO): RankedPlayerDTO {
-        val existing = rankedPlayerService.getPlayerByName(playerDTO.name)
-        if (existing != null)
+    @Authenticated
+    @SecurityRequirements(
+        value = [
+            SecurityRequirement(name = "bearerAuth")
+        ]
+    )
+    fun addPlayer(addPlayerForm: AddPlayerForm?): RankedPlayerDTO {
+        if (addPlayerForm == null)
+            throw BadRequestException()
+        if (addPlayerForm.name == null)
             throw BadRequestException()
 
-        return rankedPlayerService.create(playerDTO) ?: throw BadRequestException()
+        var oldRankedPlayer = rankedPlayerService.getPlayerByName(addPlayerForm.name!!)
+        if (oldRankedPlayer != null)
+            throw BadRequestException("Player already exists")
+
+        val userId = (securityIdentity.principal as OidcJwtCallerPrincipal).claims.getClaimValueAsString("sub")
+        oldRankedPlayer = rankedPlayerService.getPlayerByUserId(userId)
+        if(oldRankedPlayer != null)
+            throw BadRequestException("You have already created a player")
+
+
+        return rankedPlayerService.create(
+            RankedPlayer.Builder()
+                .name(addPlayerForm.name!!)
+                .userId(userId)
+        ) ?: throw BadRequestException()
+
+
     }
 
     @GET
@@ -107,5 +138,11 @@ class RankedPlayerResource {
         return rankedPlayerService.getMatchesByPlayer(player)
     }
 
+
+
 }
 
+@RegisterForReflection
+data class AddPlayerForm(
+    var name: String? = ""
+)

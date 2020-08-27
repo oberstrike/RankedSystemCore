@@ -14,6 +14,9 @@ class RankedPlayerRepository : PanacheRepository<RankedPlayer> {
         return find("name", name).firstResultOptional<RankedPlayer>().orElse(null)
     }
 
+    fun findByUserId(userId: String): RankedPlayer? {
+        return find("userId", userId).firstResultOptional<RankedPlayer>().orElse(null)
+    }
 
 }
 
@@ -25,6 +28,8 @@ interface RankedPlayerService {
 
     fun getPlayerById(id: Long): RankedPlayerDTO?
 
+    fun getPlayerByUserId(userId: String): RankedPlayerDTO?
+
     fun getPlayerByName(name: String): RankedPlayerDTO?
 
     fun getMatchesByPlayer(playerDTO: RankedPlayerDTO): Array<Long>
@@ -33,6 +38,7 @@ interface RankedPlayerService {
 
     fun create(playerDTO: RankedPlayerDTO): RankedPlayerDTO?
 
+    fun create(rankedPlayerBuilder: RankedPlayer.Builder): RankedPlayerDTO?
 
 }
 
@@ -48,6 +54,10 @@ class RankedPlayerServiceImpl : RankedPlayerService {
             .findAll()
         query.page<RankedPlayer>(Page.ofSize(10))
         return query.list<RankedPlayer>().map { convertToDTO(it)!! }.toTypedArray()
+    }
+
+    override fun getPlayerByUserId(userId: String): RankedPlayerDTO? {
+        return convertToDTO(rankedPlayerRepository.findByUserId(userId))
     }
 
 
@@ -81,6 +91,15 @@ class RankedPlayerServiceImpl : RankedPlayerService {
         } else {
             null
         }
+    }
+
+    @Transactional
+    override fun create(rankedPlayerBuilder: RankedPlayer.Builder): RankedPlayerDTO? {
+        val rankedPlayer = rankedPlayerBuilder.build()
+        rankedPlayerRepository.persist(rankedPlayer)
+        if (rankedPlayer.isPersistent)
+            return convertToDTO(rankedPlayer)
+        return null
     }
 
 

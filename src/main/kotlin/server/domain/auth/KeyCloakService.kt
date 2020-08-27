@@ -9,6 +9,9 @@ interface KeyCloakService {
     fun register(username: String, password: String, email: String)
     fun getUserIdByUsername(username: String): UserDTO?
     fun resetPassword(email: String, newPassword: String)
+    fun loginUrl(): String
+    fun addRoleToUserById(role: String, id: String)
+    fun hasRoleByUserId(role: String, id: String): Boolean
 }
 
 
@@ -39,11 +42,6 @@ data class UserDTO(
     var username: String = "",
     var email: String? = ""
 )
-
-interface IForm {
-    fun isValid(): Boolean
-}
-
 
 fun getLogInForm(username: String, password: String): Form {
     return Form()

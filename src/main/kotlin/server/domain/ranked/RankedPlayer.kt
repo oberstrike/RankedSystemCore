@@ -22,6 +22,8 @@ class RankedPlayer : IRankedPlayer<RankedPlayer, Match>, PanacheEntity() {
 
     override var name: String = ""
 
+    var userId: String? = null
+
     override var rating: Double = 1000.0
 
     //K-Faktor: https://de.wikipedia.org/wiki/Elo-Zahl
@@ -30,16 +32,19 @@ class RankedPlayer : IRankedPlayer<RankedPlayer, Match>, PanacheEntity() {
     data class Builder(
         var id: Long? = null,
         var name: String? = null,
-        var rating: Double = 1000.0
+        var rating: Double = 1000.0,
+        var userId: String? = null
     ) {
         fun id(id: Long?) = apply { this.id = id }
         fun name(name: String) = apply { this.name = name }
         fun rating(rating: Double) = apply { this.rating = rating }
+        fun userId(userId: String?) = apply { this.userId = userId }
 
         fun build(): RankedPlayer {
             val rankedPlayer = RankedPlayer()
             if (id != null) rankedPlayer.id = id!!
             if (name != null) rankedPlayer.name = name!!
+            if (userId != null) rankedPlayer.userId = userId
             rankedPlayer.rating = rating
             return rankedPlayer
         }

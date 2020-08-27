@@ -4,9 +4,9 @@ import domain.AbstractDomainTest
 import io.quarkus.test.common.QuarkusTestResource
 import io.quarkus.test.h2.H2DatabaseTestResource
 import io.quarkus.test.junit.QuarkusTest
+import net.andreinc.mockneat.unit.user.Users
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import server.domain.auth.RegisterForm
 import server.domain.auth.UserDTO
 import server.domain.auth.getLogInForm
 import util.createRegisterForm
@@ -24,14 +24,14 @@ class KeyCloakServiceTest : AbstractDomainTest() {
     }
 
     @Test
-    fun deleteTest() = withUser("oberstriker") {
+    fun deleteTest() = withRegisteredUser("oberstriker") {
         keyCloakService.delete("oberstriker")
         val test = keyCloakService.getUserIdByUsername("oberstriker")
         Assertions.assertNull(test)
     }
 
     @Test
-    fun resetPasswordWithRightPassword() = withUser("oberstriker") {
+    fun resetPasswordWithRightPassword() = withRegisteredUser("oberstriker") {
 
         keyCloakService.resetPassword(it.email!!, "newPassword")
         val map = authClient.login(getLogInForm("oberstriker", "newPassword"))
@@ -39,7 +39,7 @@ class KeyCloakServiceTest : AbstractDomainTest() {
     }
 
     @Test
-    fun resetPasswordWithWrongPassword() = withUser("oberstriker") {
+    fun resetPasswordWithWrongPassword() = withRegisteredUser("oberstriker") {
         keyCloakService.resetPassword(it.email!!, "newPassword")
         Assertions.assertThrows(Exception::class.java) {
             authClient.login(getLogInForm("oberstriker", "password"))
@@ -57,9 +57,15 @@ class KeyCloakServiceTest : AbstractDomainTest() {
         Assertions.assertNotNull(result)
         keyCloakService.delete(registerForm.username)
     }
+
+    @Test
+    fun hasRoleAfterRegistrationTest() = withRegisteredUser(Users.users().get()) { userDTO ->
+        val hasRole = keyCloakService.hasRoleByUserId("user", userDTO.id)
+        assert(hasRole)
+    }
 }
 
-fun AbstractDomainTest.withUser(username: String, block: (UserDTO) -> Unit) {
+fun AbstractDomainTest.withRegisteredUser(username: String, block: (UserDTO) -> Unit) {
     keyCloakService.register(username, "password", "email@gmx.de")
     val user = keyCloakService.getUserIdByUsername(username)
     block.invoke(user!!)

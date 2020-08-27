@@ -12,6 +12,26 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/../quarkus-discord" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../../../../../../Gradle/gradle-5.5.1" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/../quarkus-discord" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/../../../../../../../tmp" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../../../../../../Gradle/gradle-5.5.1" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/../../../../../../../tmp" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

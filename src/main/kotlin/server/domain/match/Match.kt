@@ -32,7 +32,7 @@ class Match : IMatch<Match, RankedPlayer>, PanacheEntity() {
 
     @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinTable(
-        name = "MatchPlayer",
+        name = "MatchPlayerTeamB",
         joinColumns = [
             JoinColumn("match_id")
         ],

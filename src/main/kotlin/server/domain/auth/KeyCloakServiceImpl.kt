@@ -1,31 +1,58 @@
 package server.domain.auth
 
-import io.quarkus.security.User
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import org.hibernate.annotations.NotFound
 import org.keycloak.admin.client.KeycloakBuilder
 import org.keycloak.representations.idm.CredentialRepresentation
+import org.keycloak.representations.idm.RoleRepresentation
 import org.keycloak.representations.idm.UserRepresentation
 import java.nio.file.attribute.UserPrincipalNotFoundException
-
 import javax.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 class KeyCloakServiceImpl(
-    @ConfigProperty(name = "service.serverUrl") val serverUrl: String,
-    @ConfigProperty(name = "quarkus.oidc.client-id")
-    val clientId: String,
-    @ConfigProperty(name = "quarkus.oidc.credentials.secret") val secret: String
+    @ConfigProperty(name = "service.admin.serverUrl") private val serverUrl: String,
+    @ConfigProperty(name = "service.admin.client-id") private val clientId: String,
+    @ConfigProperty(name = "service.admin.secret") private val secret: String,
+    @ConfigProperty(name = "service.admin.username") private val username: String,
+    @ConfigProperty(name = "service.admin.password") private val password: String,
+    @ConfigProperty(name = "service.admin.loginUrl") private val loginUrl: String
+
 ) : KeyCloakService {
 
     private var keycloak = KeycloakBuilder.builder()
         .serverUrl(serverUrl)
         .realm("master")
-        .clientId("admin-cli")
+        .clientId(clientId)
         .clientSecret(secret)
-        .username("admin")
-        .password("admin")
+        .username(username)
+        .password(password)
         .build()
+
+    override fun loginUrl() = loginUrl
+
+    override fun hasRoleByUserId(role: String, id: String): Boolean {
+        val userResource = keycloak.realm("quarkus")
+            .users()
+        return userResource.get(id).roles().realmLevel().listAll().map { it.name }.contains(role)
+    }
+
+    override fun addRoleToUserById(role: String, id: String) {
+        val frontendUserRole = keycloak.realm("quarkus")
+            .roles()
+            .list()
+            .stream()
+            .filter { roleRepresentation: RoleRepresentation -> role == roleRepresentation.name }
+            .findFirst().get()
+
+
+        keycloak.realm("quarkus")
+            .users()
+            .get(id)
+            .roles()
+            .realmLevel()
+            .add(listOf(frontendUserRole))
+
+    }
 
 
     override fun delete(username: String) {
@@ -58,17 +85,13 @@ class KeyCloakServiceImpl(
         userRepresentation.credentials = listOf(credentialRepresentation)
 
         val response = usersResource.create(userRepresentation)
-
         when (response.status) {
             201 -> {
                 val userId = response.location.path.split("/").last()
-                //TODO Add role to user
-
-            }
-            409 -> {
+                addRoleToUserById("user", userId)
             }
             else -> {
-
+                throw RegistrationException("Oops there was an error in the registration")
             }
         }
     }
@@ -99,8 +122,6 @@ class KeyCloakServiceImpl(
             .users()
             .get(userId)
             .resetPassword(credentialRepresentation)
-
-
     }
 
 }

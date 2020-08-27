@@ -9,4 +9,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'RankedSystemRestAPI'
+rootProject.name = 'ranked-system-rest-api'

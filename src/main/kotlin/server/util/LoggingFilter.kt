@@ -13,9 +13,10 @@ import javax.ws.rs.container.ContainerResponseContext
 import javax.ws.rs.container.ContainerResponseFilter
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.UriInfo
+import javax.ws.rs.ext.Provider
 
 
-//@Provider
+@Provider
 class LoggingFilter : ContainerRequestFilter, ContainerResponseFilter {
 
     private val logger: Logger = LoggerFactory.getLogger(LoggingFilter::class.java)

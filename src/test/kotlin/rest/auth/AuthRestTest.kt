@@ -20,7 +20,7 @@ class AuthRestTest : AbstractRestTest() {
     }
 
     @Test
-    fun resetPasswordFailWrongEmailTest() = withRegistered { user, jwtToken ->
+    fun resetPasswordFailWrongEmailTest() = withRegistered { _, jwtToken ->
         val resetPasswordPath = "/auth/resetPassword"
 
         //Wrong email
@@ -36,7 +36,7 @@ class AuthRestTest : AbstractRestTest() {
     }
 
     @Test
-    fun resetPasswordFailWrongPasswordsTest() = withRegistered { user, jwtToken ->
+    fun resetPasswordFailWrongPasswordsTest() = withRegistered { _, jwtToken ->
         val resetPasswordPath = "/auth/resetPassword"
 
         //Wrong email
@@ -133,16 +133,20 @@ class AuthRestTest : AbstractRestTest() {
 
     @Test
     fun registerTest() {
-
         val registerForm = createRegisterForm()
         val response = sendPost(path = "/auth/register", body = toJson(registerForm))
         response.then().statusCode(204)
 
         keyCloakService.delete(registerForm.username)
-
     }
 
-
+    @Test
+    fun registerFailTest(){
+        val registerForm = createRegisterForm()
+        registerForm.passwordConfirm = ""
+        val response = sendPost(path = "/auth/register", body = toJson(registerForm))
+        response.then().statusCode(400)
+    }
 }
 
 fun AbstractRestTest.withLoggedIn(
