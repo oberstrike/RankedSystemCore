@@ -56,7 +56,6 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
 
-
     testImplementation 'com.github.dasniko:testcontainers-keycloak:1.3.3'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:kotlin-extensions'

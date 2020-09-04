@@ -115,13 +115,8 @@ class AuthResource {
         if (resetPassword.email != myEmail)
             if (!securityIdentity.hasRole("ADMIN"))
                 throw NoPermissionException("No Permission to change the password")
-
-
-
         keyCloakService.resetPassword(resetPassword.email!!, resetPassword.password)
-
     }
-
 }
 
 class RegistrationException(msg: String) : Exception(msg)
