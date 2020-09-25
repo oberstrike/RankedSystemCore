@@ -1,6 +1,7 @@
 package rest
 
 import dasniko.testcontainers.keycloak.KeycloakContainer
+import io.quarkus.test.common.QuarkusTestResource
 import io.restassured.http.ContentType
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.When
@@ -17,6 +18,7 @@ import javax.json.bind.Jsonb
 import javax.json.bind.JsonbBuilder
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@QuarkusTestResource(DockerTestResource::class)
 open class AbstractRestTest {
 
 

@@ -7,13 +7,14 @@ import io.quarkus.test.junit.QuarkusTest
 import net.andreinc.mockneat.unit.user.Users
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rest.DockerTestResource
 import server.domain.auth.UserDTO
 import server.domain.auth.getLogInForm
 import util.createRegisterForm
 import java.nio.file.attribute.UserPrincipalNotFoundException
 
 @QuarkusTest
-@QuarkusTestResource(H2DatabaseTestResource::class)
+@QuarkusTestResource(DockerTestResource::class)
 class KeyCloakServiceTest : AbstractDomainTest() {
 
     @Test

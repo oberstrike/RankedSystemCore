@@ -3,9 +3,11 @@
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/../../../../../../../tmp" />
+    <file type="web" url="file://$PROJECT_DIR$/../../de-maju-test-framework" />
     <file type="web" url="file://$PROJECT_DIR$/../quarkus-discord" />
     <file type="web" url="file://$PROJECT_DIR$/../ranked-system-rest-api-queue" />
     <file type="web" url="file://$PROJECT_DIR$" />
+    <file type="web" url="file://$PROJECT_DIR$/../../test-framework" />
   </component>
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />

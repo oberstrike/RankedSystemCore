@@ -1,7 +1,9 @@
 package domain
 
+import io.quarkus.test.common.QuarkusTestResource
 import io.smallrye.mutiny.Uni
 import org.eclipse.microprofile.rest.client.inject.RestClient
+import rest.DockerTestResource
 import server.domain.auth.KeyCloakService
 import server.domain.auth.UserAuthClient
 import server.domain.match.Match
@@ -12,6 +14,7 @@ import server.domain.ranked.RankedPlayerServiceImpl
 import javax.inject.Inject
 import javax.transaction.Transactional
 
+@QuarkusTestResource(DockerTestResource::class)
 abstract class AbstractDomainTest {
 
     @Inject

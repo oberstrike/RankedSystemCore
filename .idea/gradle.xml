@@ -34,11 +34,13 @@
       </GradleProjectSettings>
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/../../../../../../../tmp" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/../../test-framework" />
         <option name="gradleHome" value="$PROJECT_DIR$/../../../../../../../Gradle/gradle-5.5.1" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/../../../../../../../tmp" />
+            <option value="$PROJECT_DIR$/../../test-framework" />
+            <option value="$PROJECT_DIR$/../../test-framework/testcontainer" />
+            <option value="$PROJECT_DIR$/../../test-framework/testcontainer-quarkus" />
           </set>
         </option>
       </GradleProjectSettings>
